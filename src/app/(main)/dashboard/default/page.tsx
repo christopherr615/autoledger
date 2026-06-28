@@ -29,24 +29,40 @@ type StandingRow = {
   time_window: string;
 };
 
-async function getDashboardData() {
-  const [metricsResult, leagueResult, standingsResult] = await Promise.all([
-    query<MetricRow>(
-      `SELECT COUNT(*) AS total, SUM(CASE WHEN status = 'active' THEN 1 ELSE 0 END) AS active, SUM(CASE WHEN is_verified THEN 1 ELSE 0 END) AS verified, SUM(CASE WHEN is_current_user THEN 1 ELSE 0 END) AS current FROM operators`,
-    ),
-    query<LeagueCount>(
-      `SELECT l.league_name, COUNT(*) AS count FROM operators o JOIN leagues l ON o.league_id = l.league_id GROUP BY l.league_name ORDER BY count DESC LIMIT 5`,
-    ),
-    query<StandingRow>(
-      `SELECT entry_id, rank, operator_name, league_name, zip_code, rep_score, rank_delta_30d, distance_miles, time_window FROM standings_page_rows WHERE league_id = 'auto' AND zip_code = '11237' AND time_window = 'Last 30 days' ORDER BY rank ASC LIMIT 10`,
-    ),
-  ]);
+const EMPTY_METRICS: MetricRow = {
+  total: "0",
+  active: "0",
+  verified: "0",
+  current: "0",
+};
 
-  return {
-    metrics: metricsResult.rows[0],
-    leagues: leagueResult.rows,
-    standings: standingsResult.rows,
-  };
+async function getDashboardData() {
+  try {
+    const [metricsResult, leagueResult, standingsResult] = await Promise.all([
+      query<MetricRow>(
+        `SELECT COUNT(*) AS total, SUM(CASE WHEN status = 'active' THEN 1 ELSE 0 END) AS active, SUM(CASE WHEN is_verified THEN 1 ELSE 0 END) AS verified, SUM(CASE WHEN is_current_user THEN 1 ELSE 0 END) AS current FROM operators`,
+      ),
+      query<LeagueCount>(
+        `SELECT l.league_name, COUNT(*) AS count FROM operators o JOIN leagues l ON o.league_id = l.league_id GROUP BY l.league_name ORDER BY count DESC LIMIT 5`,
+      ),
+      query<StandingRow>(
+        `SELECT entry_id, rank, operator_name, league_name, zip_code, rep_score, rank_delta_30d, distance_miles, time_window FROM standings_page_rows WHERE league_id = 'auto' AND zip_code = '11237' AND time_window = 'Last 30 days' ORDER BY rank ASC LIMIT 10`,
+      ),
+    ]);
+
+    return {
+      metrics: metricsResult.rows[0] ?? EMPTY_METRICS,
+      leagues: leagueResult.rows,
+      standings: standingsResult.rows,
+    };
+  } catch (error) {
+    console.error("Failed to load default dashboard data:", error);
+    return {
+      metrics: EMPTY_METRICS,
+      leagues: [],
+      standings: [],
+    };
+  }
 }
 
 export default async function Page() {

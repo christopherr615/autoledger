@@ -35,8 +35,6 @@ Standings Page
 -Performance Tips for Operators
 The standings page is the foundation because it introduces CHAMA’s main idea that local operators should be ranked by trust, performance, and consistency, and not just advertising or popularity.
 
-# the next.js template is just used as a starting point to help create our own landing page
------------------------------------------------------------------------------------------------
 # Next.js Admin Template with TypeScript & Shadcn UI
 
 **Studio Admin** - Includes multiple dashboards, authentication layouts, customizable theme presets, and more.
@@ -177,3 +175,4 @@ Contributions are welcome. Feel free to open issues, feature requests, or start 
 
 **Happy Vibe Coding!**
 ----------------------------------------------------------------------------------------------
+# autoledger
